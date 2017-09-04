@@ -27,6 +27,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	num_particles = 1000;
 	weights.resize(num_particles, 1.0);
 
+	std::default_random_engine gen;
 	std::normal_distribution<double> dist_x(x, std[0]);
 	std::normal_distribution<double> dist_y(y, std[1]);
 	std::normal_distribution<double> dist_theta(theta, std[2]);
@@ -55,6 +56,31 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
 	// NOTE: When adding noise you may find std::normal_distribution and std::default_random_engine useful.
 	//  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
 	//  http://www.cplusplus.com/reference/random/default_random_engine/
+	
+	for (auto& p : particles){
+
+		if (fabs(yaw_rate) > 0.001) {
+			p.x += velocity/yaw_rate * (sin(p.theta + yaw_rate * delta_t) - sin(p.theta));
+			p.y += velocity/yaw_rate * (cos(p.theta)  - cos(p.theta + yaw_rate * delta_t));
+			p.theta  += yaw_rate * delta_t;
+		} 
+		else {
+			p.x += velocity * delta_t * cos(p.theta);
+			p.y += velocity * delta_t * sin(p.theta);
+		}
+
+		std::default_random_engine gen;
+		std::normal_distribution<double> dist_x(p.x, std_pos[0]);
+		std::normal_distribution<double> dist_y(p.y, std_pos[1]);
+		std::normal_distribution<double> dist_theta(p.theta, std_pos[2]);
+
+		p.x = dist_x(gen);
+		p.y = dist_y(gen);
+		p.theta = dist_theta(gen);
+		
+	}
+
+	return;
 
 }
 
