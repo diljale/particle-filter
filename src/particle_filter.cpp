@@ -25,7 +25,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	//   x, y, theta and their uncertainties from GPS) and all weights to 1. 
 	// Add random Gaussian noise to each particle.
 	// NOTE: Consult particle_filter.h for more information about this method (and others in this file).
-	num_particles = 1000;
+	num_particles = 100;
 	weights.resize(num_particles, 1.0);
 
 	std::default_random_engine gen;
@@ -210,6 +210,7 @@ string ParticleFilter::getAssociations(Particle best)
 {
 	vector<int> v = best.associations;
 	stringstream ss;
+	std::cout << v.size() << std::endl;
     copy( v.begin(), v.end(), ostream_iterator<int>(ss, " "));
     string s = ss.str();
     s = s.substr(0, s.length()-1);  // get rid of the trailing space
