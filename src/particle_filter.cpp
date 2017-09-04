@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <iostream>
 #include <numeric>
+#include <limits>
 #include <math.h> 
 #include <iostream>
 #include <sstream>
@@ -89,7 +90,20 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::ve
 	//   observed measurement to this particular landmark.
 	// NOTE: this method will NOT be called by the grading code. But you will probably find it useful to 
 	//   implement this method and use it as a helper during the updateWeights phase.
+	LandmarkObs bestLandmark;
+	
+	for (const auto& src : observations){
+		
+		double minDist = std::numeric_limits<double>::max(); 
 
+		for (const auto& target : predicted){
+			double distance = dist(src.x,src.y,target.x,target.y);
+			if (distance < minDist) {
+				minDist = distance;
+				bestLandmark = target;
+			}
+		}
+	}
 }
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
