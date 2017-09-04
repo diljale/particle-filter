@@ -51,6 +51,7 @@ int main()
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
 
+	  std::cout << "Starting new iteration\n";
     if (length && length > 2 && data[0] == '4' && data[1] == '2')
     {
 
@@ -78,7 +79,7 @@ int main()
 			// Predict the vehicle's next state from previous (noiseless control) data.
 		  	double previous_velocity = std::stod(j[1]["previous_velocity"].get<std::string>());
 			double previous_yawrate = std::stod(j[1]["previous_yawrate"].get<std::string>());
-
+std::cout << "Calling prediction\n";
 			pf.prediction(delta_t, sigma_pos, previous_velocity, previous_yawrate);
 		  }
 
@@ -110,6 +111,7 @@ int main()
 				noisy_observations.push_back(obs);
         	}
 
+		std::cout << "Calling update\n";
 		  // Update the weights and resample
 		  pf.updateWeights(sensor_range, sigma_landmark, noisy_observations, map);
 		  pf.resample();
@@ -141,8 +143,8 @@ int main()
           msgJson["best_particle_sense_y"] = pf.getSenseY(best_particle);
 
           auto msg = "42[\"best_particle\"," + msgJson.dump() + "]";
-           std::cout << msg << std::endl;
-         // ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+          // std::cout << msg << std::endl;
+          ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
 	  
         }
       } else {
