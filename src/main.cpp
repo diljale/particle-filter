@@ -131,9 +131,9 @@ std::cout << "Calling prediction\n";
 		  cout << "average w " << weight_sum/num_particles << endl;
 
           json msgJson;
-          msgJson["best_particle_x"] = best_particle.x;
-          msgJson["best_particle_y"] = best_particle.y;
-          msgJson["best_particle_theta"] = best_particle.theta;
+          msgJson["best_particle_x"] = 10;//best_particle.x;
+          msgJson["best_particle_y"] = 10;//best_particle.y;
+          msgJson["best_particle_theta"] = 0;//best_particle.theta;
 
           //Optional message data used for debugging particle's sensing and associations
         //  msgJson["best_particle_associations"] = pf.getAssociations(best_particle);
