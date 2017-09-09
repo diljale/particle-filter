@@ -50,8 +50,6 @@ int main()
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
-
-	  std::cout << "Starting new iteration\n";
     if (length && length > 2 && data[0] == '4' && data[1] == '2')
     {
 
@@ -149,6 +147,7 @@ std::cout << "Calling prediction\n";
         }
       } else {
         std::string msg = "42[\"manual\",{}]";
+	      std::cout << msg << std::endl;
         ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
       }
     }
