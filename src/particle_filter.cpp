@@ -25,7 +25,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	//   x, y, theta and their uncertainties from GPS) and all weights to 1. 
 	// Add random Gaussian noise to each particle.
 	// NOTE: Consult particle_filter.h for more information about this method (and others in this file).
-	num_particles = 100;
+	num_particles = 500;
 	weights.resize(num_particles, 1.0);
 
 	std::default_random_engine gen;
@@ -90,25 +90,7 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::ve
 	//   observed measurement to this particular landmark.
 	// NOTE: this method will NOT be called by the grading code. But you will probably find it useful to 
 	//   implement this method and use it as a helper during the updateWeights phase.
-	LandmarkObs best_landmark;
-	std::vector<LandmarkObs> mapped_observations;
-	for (const auto& src : observations){
-		
-		double min_dist = std::numeric_limits<double>::max(); 
-
-		for (const auto& target : predicted){
-			double distance = dist(src.x,src.y,target.x,target.y);
-			if (distance < min_dist) {
-				min_dist = distance;
-				best_landmark = target;
-			}
-		}
-		
-		best_landmark.id = src.id;
-		mapped_observations.push_back(best_landmark);
-	}
 	
-	observations = mapped_observations;
 }
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
@@ -137,7 +119,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		  transformed.y = p.y + observation.x * sin(p.theta) + observation.y * cos(p.theta);
 		  transformed.id = observation.id;
 		  observations_absolute.push_back(transformed);
-		    std::cout << "Transformed: " << transformed.x << " " << transformed.y << std::endl;
 	     }
 
              std::vector<LandmarkObs> predicted;
@@ -148,7 +129,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 			tmp.id = landmark.id_i;
 			tmp.x = landmark.x_f;
 			tmp.y = landmark.y_f;
-			  std::cout << "Predicted: " << tmp.x << " " <<tmp.y << std::endl;
 		      predicted.push_back(tmp);		
 		  }
 	      }
@@ -169,7 +149,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 			}
 
 			associated_landmarks.push_back(closest);
-			 std::cout << "Closest: " << closest.x << " " <<closest.y << std::endl;
 		}
 		
 	      std::vector<int> associations;
