@@ -148,19 +148,35 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		  }
 	      }
               
-	      std::vector<LandmarkObs> observations_actual = observations_absolute;	
-	      dataAssociation(predicted, observations_actual);
+	      std::vector<LandmarkObs> associated_landmarks;
+		LandmarkObs closest;
+
+		for (auto obs: observations_absolute){
+
+			double shortest = 1E10; // some number larger than any possible measurement 
+
+			for (auto pred: predicted){
+				double distance = dist(obs.x,obs.y,pred.x,pred.y);
+				if (distance < shortest) {
+					shortest = distance;
+					closest = pred;
+				}
+			}
+
+			associated_landmarks.push_back(closest);
+		}
+		
 	      std::vector<int> associations;
 	      std::vector<double> sense_x;
 	      std::vector<double> sense_y;
 	      double probability = 1;		
 	      for (int j=0; j < observations_absolute.size(); ++j){
-		  double dx = observations_absolute.at(j).x - observations_actual.at(j).x;
-		  double dy = observations_absolute.at(j).y - observations_actual.at(j).y;
+		  double dx = observations_absolute.at(j).x - associated_landmarks.at(j).x;
+		  double dy = observations_absolute.at(j).y - associated_landmarks.at(j).y;
 		  probability *= 1.0/(2*M_PI*sigma_x*sigma_y) * exp(-dx*dx / (2*sigma_x*sigma_x))* exp(-dy*dy / (2*sigma_y*sigma_y));
 		  associations.push_back(observations_actual.at(j).id);
-		  sense_x.push_back(observations_actual.at(j).x);
-		  sense_y.push_back(observations_actual.at(j).y);		    
+		  sense_x.push_back(associated_landmarks.at(j).x);
+		  sense_y.push_back(associated_landmarks.at(j).y);		    
 	      }
 
 	      p = SetAssociations(p, associations, sense_x, sense_y);
