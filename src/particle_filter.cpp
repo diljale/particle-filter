@@ -146,7 +146,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		      LandmarkObs tmp;
 			tmp.id = landmark.id_i;
 			tmp.x = landmark.x_f;
-			tmp.y = landmark.y_f};
+			tmp.y = landmark.y_f;
 		      predicted.push_back(tmp);		
 		  }
 	      }
