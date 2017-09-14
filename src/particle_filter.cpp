@@ -32,7 +32,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	std::normal_distribution<double> dist_x(x, std[0]);
 	std::normal_distribution<double> dist_y(y, std[1]);
 	std::normal_distribution<double> dist_theta(theta, std[2]);
-
+std::cout << theta << std::endl;
 	for (int i = 0; i < num_particles; ++i) {
 	
 		Particle particle;
@@ -137,6 +137,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		  transformed.y = p.y + observation.x * sin(p.theta) + observation.y * cos(p.theta);
 		  transformed.id = observation.id;
 		  observations_absolute.push_back(transformed);
+		    std::cout << "Transformed: " << transformed.x << " " << transformed.y << std::endl;
 	     }
 
              std::vector<LandmarkObs> predicted;
@@ -147,6 +148,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 			tmp.id = landmark.id_i;
 			tmp.x = landmark.x_f;
 			tmp.y = landmark.y_f;
+			  std::cout << "Predicted: " << tmp.x << " " <<tmp.y << std::endl;
 		      predicted.push_back(tmp);		
 		  }
 	      }
