@@ -178,8 +178,8 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		  double dy = observations_absolute.at(j).y - associated_landmarks.at(j).y;
 		  probability *= 1.0/(2*M_PI*sigma_x*sigma_y) * exp(-dx*dx / (2*sigma_x*sigma_x))* exp(-dy*dy / (2*sigma_y*sigma_y));
 		  associations.push_back(observations_absolute.at(j).id);
-		  sense_x.push_back(observations_absolute.at(j).x);
-		  sense_y.push_back(observations_absolute.at(j).y);		    
+		  sense_x.push_back(observations.at(j).x);
+		  sense_y.push_back(observations.at(j).y);		    
 	      }
 
 	      p = SetAssociations(p, associations, sense_x, sense_y);
