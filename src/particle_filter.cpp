@@ -142,7 +142,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		  }
 	      }
               
-	     dataAssociation(predictions, observations_absolute);
+	     dataAssociation(predicted, observations_absolute);
 		
 	      p.weight = 1;		
 	      for(const auto& obs : observations_absolute){
