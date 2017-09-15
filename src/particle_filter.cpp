@@ -116,9 +116,8 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	double sigma_x = std_landmark[0];
 	double sigma_y = std_landmark[1];
 
-	for(int i=0; i < particles.size(); ++i) {
-	    Particle& p = particles[i];
-
+	for(auto&p : particles) {
+	   
 	    std::vector<LandmarkObs> observations_absolute;
 	    for (const auto& observation: observations){
 		  LandmarkObs transformed;
