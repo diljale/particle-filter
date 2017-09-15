@@ -26,8 +26,6 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	// Add random Gaussian noise to each particle.
 	// NOTE: Consult particle_filter.h for more information about this method (and others in this file).
 	num_particles = 100;
-	weights.resize(num_particles, 1.0);
-
 	std::default_random_engine gen;
 	std::normal_distribution<double> dist_x(x, std[0]);
 	std::normal_distribution<double> dist_y(y, std[1]);
@@ -144,7 +142,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
               
 	     dataAssociation(predicted, observations_absolute);
 		
-	      p.weight = 1;		
+	      p.weight = 1.0;		
 	      for(const auto& obs : observations_absolute){
 		      auto landmark = map_landmarks.landmark_list.at(obs.id-1);
 		      double x_term = pow(obs.x - landmark.x_f, 2) / (2 * pow(sigma_x, 2));
@@ -152,7 +150,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		      double w = exp(-(x_term + y_term)) / (2 * M_PI * sigma_x * sigma_y);
 		      p.weight *=  w;
 	    }
-            weights[i] = p.weight;
+            weights.push_back(p.weight);
 	}
 }
 
@@ -167,10 +165,11 @@ void ParticleFilter::resample() {
 
 	for(int i = 0; i < num_particles; ++i){
 		int index = dist_p(gen);
-		weighted.at(i) = particles.at(index);
+		weighted[i] = particles[index];
 	}
 
-	particles = std::move(weighted);
+	particles = weighted;
+	weights.clear();
 
 }
 
