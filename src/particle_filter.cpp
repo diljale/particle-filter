@@ -32,7 +32,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	std::normal_distribution<double> dist_x(x, std[0]);
 	std::normal_distribution<double> dist_y(y, std[1]);
 	std::normal_distribution<double> dist_theta(theta, std[2]);
-std::cout << theta << std::endl;
+        particles.clear();
 	for (int i = 0; i < num_particles; ++i) {
 	
 		Particle particle;
@@ -71,13 +71,13 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
 		}
 
 		std::default_random_engine gen;
-		std::normal_distribution<double> dist_x(p.x, std_pos[0]);
-		std::normal_distribution<double> dist_y(p.y, std_pos[1]);
-		std::normal_distribution<double> dist_theta(p.theta, std_pos[2]);
+		std::normal_distribution<double> dist_x(0, std_pos[0]);
+		std::normal_distribution<double> dist_y(0, std_pos[1]);
+		std::normal_distribution<double> dist_theta(0, std_pos[2]);
 
-		p.x = dist_x(gen);
-		p.y = dist_y(gen);
-		p.theta = dist_theta(gen);
+		p.x += dist_x(gen);
+		p.y += dist_y(gen);
+		p.theta += dist_theta(gen);
 		
 	}
 
@@ -90,7 +90,16 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::ve
 	//   observed measurement to this particular landmark.
 	// NOTE: this method will NOT be called by the grading code. But you will probably find it useful to 
 	//   implement this method and use it as a helper during the updateWeights phase.
-	
+	for(auto& obs: observations){
+		double min_dist = std::numeric_limits<double>::max();
+		for(const auto& pred: predicted){
+			double distance = dist(obs.x, obs.y, pred.x, pred.y);
+			if( min_dist > distance){
+				min_dist = distance;
+				obs.id = pred.id;
+			}
+		}
+	}
 }
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
@@ -110,7 +119,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	double sigma_y = std_landmark[1];
 
 	for(int i=0; i < particles.size(); ++i) {
-	    Particle p = particles[i];
+	    Particle& p = particles[i];
 
 	    std::vector<LandmarkObs> observations_absolute;
 	    for (const auto& observation: observations){
@@ -133,41 +142,17 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		  }
 	      }
               
-	      std::vector<LandmarkObs> associated_landmarks;
-		LandmarkObs closest;
-
-		for (auto obs: observations_absolute){
-
-			double shortest = 1E10; // some number larger than any possible measurement 
-
-			for (auto pred: predicted){
-				double distance = dist(obs.x,obs.y,pred.x,pred.y);
-				if (distance < shortest) {
-					shortest = distance;
-					closest = pred;
-				}
-			}
-
-			associated_landmarks.push_back(closest);
-		}
+	     dataAssociation(predictions, observations_absolute);
 		
-	      std::vector<int> associations;
-	      std::vector<double> sense_x;
-	      std::vector<double> sense_y;
-	      double probability = 1;		
-	      for (int j=0; j < observations_absolute.size(); ++j){
-		  double dx = observations_absolute.at(j).x - associated_landmarks.at(j).x;
-		  double dy = observations_absolute.at(j).y - associated_landmarks.at(j).y;
-		  probability *= 1.0/(2*M_PI*sigma_x*sigma_y) * exp(-((dx*dx / (2*sigma_x*sigma_x)) + (dy*dy / (2*sigma_y*sigma_y))));
-		  associations.push_back(associated_landmarks.at(j).id);
-		  sense_x.push_back(associated_landmarks.at(j).x);
-		  sense_y.push_back(associated_landmarks.at(j).y);		    
-	      }
-
-	      p = SetAssociations(p, associations, sense_x, sense_y);
-	      p.weight = probability;
-	      weights[i] = probability;
-             
+	      p.weight = 1;		
+	      for(const auto& obs : observations_absolute){
+		      auto landmark = map_landmarks.landmark_list.at(obs.id-1);
+		      double x_term = pow(obs.x - landmark.x_f, 2) / (2 * pow(sigma_x, 2));
+		      double y_term = pow(obs.y - landmark.y_f, 2) / (2 * pow(sigma_y, 2));
+		      double w = exp(-(x_term + y_term)) / (2 * M_PI * sigma_x * sigma_y);
+		      p.weight *=  w;
+	    }
+            weights[i] = p.weight;
 	}
 }
 
@@ -177,7 +162,8 @@ void ParticleFilter::resample() {
 	//   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
 	std::discrete_distribution<int> dist_p(weights.begin(), weights.end());
 	std::vector<Particle> weighted(num_particles);
-	std::default_random_engine gen;
+	std::random_device rd;
+        std::mt19937 gen(rd());
 
 	for(int i = 0; i < num_particles; ++i){
 		int index = dist_p(gen);
